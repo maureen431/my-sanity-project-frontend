@@ -1,24 +1,36 @@
 const DOCUMENT_ID = 'text-saver-entry';
 let sanityClient;
 
-// Wait for Sanity library to load - check for common global names
+// Wait for Sanity library to load - check for createClient function
 function waitForSanity() {
   return new Promise((resolve, reject) => {
-    // Check if Sanity is available - could be window.sanityClient, window.SanityClient, or window.sanity
-    if (window.sanityClient || window.SanityClient || (window.sanity && window.sanity.createClient)) {
-      resolve();
+    // Check if Sanity is available
+    if (window.createClient || window.sanityLoaded) {
+      // If sanityLoaded is true but createClient isn't ready yet, wait a bit more
+      if (window.createClient) {
+        resolve();
+      } else {
+        // Wait a bit more for the module to finish loading
+        setTimeout(() => {
+          if (window.createClient) {
+            resolve();
+          } else {
+            reject(new Error('createClient not available after module loaded'));
+          }
+        }, 100);
+      }
     } else {
-      // Check every 100ms for up to 5 seconds
+      // Check every 100ms for up to 10 seconds (modules can take longer)
       let attempts = 0;
-      const maxAttempts = 50;
+      const maxAttempts = 100;
       const interval = setInterval(() => {
         attempts++;
-        if (window.sanityClient || window.SanityClient || (window.sanity && window.sanity.createClient)) {
+        if (window.createClient) {
           clearInterval(interval);
           resolve();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          reject(new Error('Sanity library failed to load after 5 seconds'));
+          reject(new Error('Sanity library failed to load after 10 seconds. Check network tab for errors.'));
         }
       }, 100);
     }
@@ -30,37 +42,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   try {
     await waitForSanity();
     
-    // Try different ways the client might be exposed
-    let createClientFn;
-    if (window.SanityClient && typeof window.SanityClient === 'function') {
-      // If SanityClient is the constructor
-      createClientFn = window.SanityClient;
-    } else if (window.SanityClient && window.SanityClient.createClient) {
-      createClientFn = window.SanityClient.createClient;
-    } else if (window.sanity && window.sanity.createClient) {
-      createClientFn = window.sanity.createClient;
-    } else if (window.sanityClient && typeof window.sanityClient === 'function') {
-      createClientFn = window.sanityClient;
-    }
-    
-    if (!sanityClient && createClientFn) {
-      sanityClient = createClientFn({
+    // Use createClient from esm.sh module
+    if (window.createClient) {
+      sanityClient = window.createClient({
         projectId: 'iv378ryl',
         dataset: 'production',
         useCdn: false,
         apiVersion: '2024-01-01',
         token: 'skuKYk3e0ZLjfzRnZRMLcUu62r0DwoiKHN0nHCSwKoH0MQRscs9GtcO0wz5N4GKAtqX68XguiP6m9dEKkZ9FINwTfGbjOb4X4GXVcTngHszK9PT4ceuHdQhw4G3cyMJ9fcpLn2Mybyq7MsXeTWuzeSw3Mfw3ExPsuPbEVPGnuPXVhrGZy5M1'
       });
-    } else if (window.sanityClient && typeof window.sanityClient === 'object') {
-      // If it's already initialized
-      sanityClient = window.sanityClient;
-    }
-    
-    if (sanityClient) {
-      console.log('Sanity client initialized successfully', sanityClient);
+      console.log('Sanity client initialized successfully');
     } else {
-      console.error('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('sanity')));
-      throw new Error('Could not find createClient function. Check console for available Sanity globals.');
+      throw new Error('createClient function not found on window object');
     }
   } catch (error) {
     console.error('Failed to initialize Sanity client:', error);

@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <title>My Simple App</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.sanity.io/js/client/2.0.0/client.min.js"></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@sanity/client@6';
+    window.createClient = createClient;
+    window.sanityLoaded = true;
+  </script>
 </head>
 <body>
 
