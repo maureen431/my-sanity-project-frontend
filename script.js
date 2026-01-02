@@ -1,11 +1,11 @@
 // Initialize Sanity client
-const sanityClient = window.sanityClient({
+const sanityClient = window.sanity.createClient({
   projectId: 'iv378ryl',
   dataset: 'production',
   useCdn: false,
   apiVersion: '2024-01-01',
   // Add your token here if you have write permissions
- token: 'skuKYk3e0ZLjfzRnZRMLcUu62r0DwoiKHN0nHCSwKoH0MQRscs9GtcO0wz5N4GKAtqX68XguiP6m9dEKkZ9FINwTfGbjOb4X4GXVcTngHszK9PT4ceuHdQhw4G3cyMJ9fcpLn2Mybyq7MsXeTWuzeSw3Mfw3ExPsuPbEVPGnuPXVhrGZy5M1'
+  token: 'skuKYk3e0ZLjfzRnZRMLcUu62r0DwoiKHN0nHCSwKoH0MQRscs9GtcO0wz5N4GKAtqX68XguiP6m9dEKkZ9FINwTfGbjOb4X4GXVcTngHszK9PT4ceuHdQhw4G3cyMJ9fcpLn2Mybyq7MsXeTWuzeSw3Mfw3ExPsuPbEVPGnuPXVhrGZy5M1'
 });
 
 const DOCUMENT_ID = 'text-saver-entry';
